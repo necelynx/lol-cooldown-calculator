@@ -26,7 +26,53 @@ var SUMMONER_SPELLS = [
    it back to ready. Keyed by ability letter (Q/W/E/R) or spell slot
    (spell1/spell2), independent of the render cycle. ---- */
 var trackers = { Q: null, W: null, E: null, R: null, spell1: null, spell2: null };
+var alerts = { Q: false, W: false, E: false, R: false, spell1: false, spell2: false };
 var TRACK_TICK_MS = 250;
+
+/* off-cooldown voice/audio alerts: uses the browser's built-in Web Speech API
+   (SpeechSynthesis) so "Ignite off cooldown" etc. is spoken with no server,
+   no API key, and no internet connection required on most systems (it uses
+   whatever TTS voices are already installed in the OS/browser). Falls back
+   to a short beep tone via the Web Audio API if speech synthesis isn't
+   available at all. */
+function getAlertPhrase(key) {
+  if (key === "spell1" || key === "spell2") {
+    var spell = SUMMONER_SPELLS.filter(function (s) { return s.id === state[key]; })[0];
+    return (spell ? spell.name : key) + " off cooldown";
+  }
+  if (key === "R") return "Ultimate off cooldown";
+  var champ = CHAMP_DATA[state.championId];
+  var name = (champ && champ.abilities[key]) ? champ.abilities[key].name : key;
+  return name + " off cooldown";
+}
+
+function beep() {
+  try {
+    var ctx = window.__beepCtx || (window.__beepCtx = new (window.AudioContext || window.webkitAudioContext)());
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.frequency.value = 660;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch (e) { /* audio unavailable, ignore */ }
+}
+
+function speak(text) {
+  if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined") {
+    try {
+      var u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.0;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+      return;
+    } catch (e) { /* fall through to beep */ }
+  }
+  beep();
+}
 
 function toggleTracker(key, cd) {
   if (trackers[key]) {
@@ -57,7 +103,10 @@ function updateTrackIcon(key) {
 function tickTrackers() {
   Object.keys(trackers).forEach(function (key) {
     if (trackers[key]) {
-      if (trackers[key].endTime - Date.now() <= 0) trackers[key] = null;
+      if (trackers[key].endTime - Date.now() <= 0) {
+        trackers[key] = null;
+        if (alerts[key]) speak(getAlertPhrase(key));
+      }
       updateTrackIcon(key);
     }
   });
@@ -66,8 +115,11 @@ function tickTrackers() {
 function trackIconHtml(key, label, cd, disabled) {
   var cls = "trackIcon" + (disabled ? " trackDisabled" : "");
   var cdAttr = disabled ? "" : cd;
-  return '<span class="' + cls + '" data-key="' + key + '" data-cd="' + cdAttr + '">' +
+  var html = '<span class="' + cls + '" data-key="' + key + '" data-cd="' + cdAttr + '">' +
     '<span class="trackLabel">' + label + '</span><span class="trackTime"></span></span>';
+  html += '<label class="alertToggle"><input type="checkbox" class="alertCheck" data-key="' + key + '"' +
+    (alerts[key] ? " checked" : "") + (disabled ? " disabled" : "") + '> Alert</label>';
+  return html;
 }
 
 function bindTrackClicks(containerId) {
@@ -75,6 +127,11 @@ function bindTrackClicks(containerId) {
     var icon = e.target.closest(".trackIcon");
     if (!icon || icon.classList.contains("trackDisabled")) return;
     toggleTracker(icon.getAttribute("data-key"), icon.getAttribute("data-cd"));
+  });
+  document.getElementById(containerId).addEventListener("change", function (e) {
+    var cb = e.target.closest(".alertCheck");
+    if (!cb) return;
+    alerts[cb.getAttribute("data-key")] = cb.checked;
   });
 }
 
@@ -269,7 +326,7 @@ function render() {
     'Skill order (which ability is maxed first) is an estimate from current aggregate play data on ' +
     '<a href="https://u.gg/" target="_blank">u.gg</a>, <a href="https://mobalytics.gg/" target="_blank">Mobalytics</a> and ' +
     '<a href="https://op.gg/" target="_blank">op.gg</a> &mdash; override any ability\'s rank above if your build differs.</div>';
-  html += '<div class="trackHint">Click an ability\'s Track icon when you see the enemy use it, to start counting down its cooldown. Click it again to reset if you misclicked.</div>';
+  html += '<div class="trackHint">Click an ability\'s Track icon when you see the enemy use it, to start counting down its cooldown. Click it again to reset if you misclicked. Check \'Alert\' on any ability to hear it announced by voice the moment its cooldown ends.</div>';
 
   main.innerHTML = html;
   ABIL_KEYS.forEach(updateTrackIcon);

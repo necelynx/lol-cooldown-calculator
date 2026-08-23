@@ -240,7 +240,22 @@ table.formula td { padding: 2px 6px; border-bottom: 1px dotted #333; }
 }
 
 /* ---- cooldown tracker icons (mid-game overlay replacement) ---- */
-table.abilities td.trackCell { text-align: center; width: 44px; }
+table.abilities td.trackCell { text-align: center; width: 58px; }
+.alertToggle {
+  display: block;
+  font-size: 9px;
+  color: #7a8091;
+  margin-top: 3px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.alertToggle input {
+  vertical-align: middle;
+  margin-right: 2px;
+  cursor: pointer;
+}
+.alertToggle input:disabled { cursor: default; }
 .trackIcon {
   display: inline-flex;
   align-items: center;

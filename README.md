@@ -96,6 +96,15 @@ This isn't in Data Dragon — it's playstyle convention, not a game rule — so 
 **Collapsible sections**
 - Click any section's title bar (the dark bar with a `[-]`/`[+]` indicator) to collapse it down to just the title, or expand it again. Useful for hiding modules you don't need on screen, e.g. Summoner Spells or the Notes section, while using this as a compact overlay next to your game.
 
+**Voice alerts ("Ignite off cooldown", "Ultimate off cooldown", etc.)**
+- Every Track icon (all 4 abilities and both summoner spell slots) has a small "Alert" checkbox underneath it.
+- Check it, and when that timer finishes, the page speaks a phrase out loud using your browser's built-in text-to-speech engine (the Web Speech API's `SpeechSynthesis` interface) — no server, no API key, and no internet connection required, since it uses whatever TTS voice is already installed on your OS/browser.
+- Phrasing: Q/W/E use the ability's real name (e.g. "Charm off cooldown" for Ahri's E), R always says "Ultimate off cooldown" regardless of champion (since that's the callout that matters most, mid-fight, without having to know every champion's R name), and summoner spells use their real name (e.g. "Ignite off cooldown", "Flash off cooldown").
+- "Test Alert Voice" in the top nav bar plays a sample phrase immediately, so you can confirm your system's TTS works before relying on it mid-game.
+- If your browser has no speech synthesis support at all, it silently falls back to a short beep tone instead of doing nothing.
+- Alert checkboxes are independent of the tracker itself — checking "Alert" doesn't start a timer, it just decides whether a *future* timer for that slot announces itself when it finishes. Your checked/unchecked choices persist across champion switches and re-renders (level/haste changes), so you can, e.g., always leave "R" and "Flash" checked and forget about it.
+- Why not different distinct chime sounds instead of speech? A single set of ability-specific spoken names scales to all 173 champions x 4 abilities without needing 692 unique sound files, and it's the same self-describing approach real casters/coaches use ("his flash is up") rather than needing to memorize which beep pitch means which ability.
+
 ## Explicit exclusions (per your instructions)
 
 - Passive abilities are not included, even for champions whose passive cooldown is affected by ability haste (e.g. Kled, Rakan, Vi). Only the 4 main abilities (Q/W/E/R) are calculated.
