@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LoL Cooldown Calculator :: Ability Haste Edition</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+
+<div class="pagewrap">
+
+  <div class="banner">
+    <h1>LEAGUE OF LEGENDS COOLDOWN CALCULATOR</h1>
+    <div class="subtitle">ability haste &middot; champion level &middot; all 4 abilities &mdash; <span class="blink">est. patch 16.16</span></div>
+  </div>
+
+  <div class="navbar">
+    Home <span class="sep">|</span> <a href="#formulabox">Ability Haste Formula</a> <span class="sep">|</span> <a href="#notesbox">Notes &amp; Sources</a> <span class="sep">|</span> <span style="color:#666;">Best viewed at any resolution, unlike it's 1999</span>
+  </div>
+
+  <div class="content">
+    <table class="layout" cellspacing="0" cellpadding="0">
+      <tr>
+        <td class="sidebar">
+
+          <div class="box">
+            <div class="boxhead">&gt;&gt; Select Champion</div>
+            <div class="boxbody">
+              <label for="champSearch">Type a name:</label>
+              <input type="text" id="champSearch" autocomplete="off" placeholder="e.g. Ahri, Yasuo, Jinx...">
+              <div class="champListBox" id="champListBox"></div>
+            </div>
+          </div>
+
+        </td>
+        <td class="main">
+          <div class="box">
+            <div class="boxhead">&gt;&gt; Cooldowns</div>
+            <div class="boxbody" id="mainPanel"></div>
+          </div>
+
+          <div class="box" id="summonerBox">
+            <div class="boxhead">&gt;&gt; Summoner Spells</div>
+            <div class="boxbody">
+              <table class="formula" style="margin-bottom:8px;">
+                <tr>
+                  <td style="width:50%;">
+                    <label for="spell1Select">Summoner Spell 1:</label><br>
+                    <select id="spell1Select" style="width:100%;"></select>
+                  </td>
+                  <td style="width:50%;">
+                    <label for="spell2Select">Summoner Spell 2:</label><br>
+                    <select id="spell2Select" style="width:100%;"></select>
+                  </td>
+                </tr>
+              </table>
+              <label><input type="checkbox" id="lucidBootsCheck"> Lucid Boots (Ionian Boots of Lucidity) &mdash; +10 summoner spell haste</label><br>
+              <label><input type="checkbox" id="cosmicInsightCheck"> Cosmic Insight (rune) &mdash; +18 summoner spell haste</label>
+              <div id="summonerResults"></div>
+              <div class="sourceNote">Base cooldowns per <a href="https://wiki.leagueoflegends.com/en-us/" target="_blank">wiki.leagueoflegends.com</a> spell pages. Lucid Boots and Cosmic Insight values per their current wiki pages &mdash; both affect summoner spell haste, not ability haste, so they only change the numbers in this box.</div>
+            </div>
+          </div>
+
+          <table class="subrow" cellspacing="0" cellpadding="0">
+            <tr>
+              <td class="subcol">
+                <div class="box">
+                  <div class="boxhead">&gt;&gt; Champion Stats</div>
+                  <div class="boxbody">
+                    <label for="levelInput">Champion Level (1-18):</label><br>
+                    <input type="number" id="levelInput" min="1" max="18" value="18" style="width:50px;">
+                    <input type="range" id="levelSlider" min="1" max="18" value="18" style="width:100%;">
+                    <br><br>
+                    <label for="hasteInput">Ability Haste:</label><br>
+                    <input type="number" id="hasteInput" min="0" value="0" style="width:80px;"> (0 = no ability haste)
+                  </div>
+                </div>
+              </td>
+              <td class="subcol">
+                <div class="box" id="formulabox">
+                  <div class="boxhead">&gt;&gt; Ability Haste Formula</div>
+                  <div class="boxbody">
+                    <table class="formula">
+                      <tr><td colspan="2"><i>Effective CD</i> = <i>Base CD</i> &divide; (1 + <i>AH</i> &divide; 100)</td></tr>
+                      <tr><td>0 AH</td><td>0% reduction</td></tr>
+                      <tr><td>50 AH</td><td>~33% reduction</td></tr>
+                      <tr><td>100 AH</td><td>50% reduction</td></tr>
+                      <tr><td>200 AH</td><td>~67% reduction</td></tr>
+                    </table>
+                    <div class="sourceNote">Per <a href="https://wiki.leagueoflegends.com/en-us/Haste" target="_blank">wiki.leagueoflegends.com/Haste</a> &mdash; ability haste is uncapped and unlike old CDR, there's no diminishing-returns cap.</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="box" id="notesbox">
+            <div class="boxhead">&gt;&gt; Notes on Rank Estimation</div>
+            <div class="boxbody">
+              <p>Non-ultimate abilities (Q/W/E) don't have a fixed rank at a given level &mdash; it depends on which
+              order a player levels them in. This calculator estimates ranks using the standard "max one ability
+              at a time" leveling convention:</p>
+              <ol>
+                <li>Level 1-3: one point into each of Q/W/E, in the champion's typical priority order.</li>
+                <li>From level 4 on: keep maxing the highest-priority ability first, then the second, then the third.</li>
+                <li>The Ultimate (R) always ranks up at levels 6, 11 and 16 when available.</li>
+              </ol>
+              <p>The "typical priority order" for each champion was pulled from current aggregate skill-order data
+              on u.gg, Mobalytics and op.gg (majority vote across sources where they disagreed). If your build maxes
+              a different ability first, use the rank dropdown next to each ability to override the estimate manually
+              &mdash; the cooldown updates instantly.</p>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="footer">
+    Base ability data sourced from Riot's official Data Dragon game files (patch 16.16.1), cross-referenced with
+    <a href="https://wiki.leagueoflegends.com/en-us/" target="_blank">wiki.leagueoflegends.com</a>.
+    Skill-order estimates cross-checked across u.gg / Mobalytics / op.gg / League of Graphs.
+    Not affiliated with Riot Games. For personal/offline use.
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

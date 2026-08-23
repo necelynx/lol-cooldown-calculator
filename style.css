@@ -1,0 +1,286 @@
+/* ===================================================================
+   LoL Cooldown Calculator - classic legacy fansite look, dark theme
+   =================================================================== */
+
+body {
+  background-color: #0b0b0f;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 24px);
+  color: #c8c8c8;
+  font-family: Verdana, Geneva, Arial, sans-serif;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+a { color: #6ea8ff; text-decoration: underline; }
+a:visited { color: #b088e8; }
+a:hover { color: #ffcc33; }
+
+.pagewrap {
+  width: 950px;
+  margin: 12px auto;
+  border: 2px outset #555;
+  background-color: #14141a;
+  padding: 0;
+}
+
+/* ---- banner ---- */
+.banner {
+  background-color: #1c1c26;
+  border-bottom: 2px inset #444;
+  padding: 10px 14px;
+  text-align: center;
+}
+.banner h1 {
+  margin: 0;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+  color: #f0c34b;
+  text-shadow: 1px 1px 0 #000, 0 0 6px rgba(240,195,75,0.35);
+}
+.banner .subtitle {
+  color: #8a93a6;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+/* ---- nav bar ---- */
+.navbar {
+  background-color: #22222e;
+  border-bottom: 2px outset #444;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #9aa0ad;
+}
+.navbar span.sep { color: #555; margin: 0 6px; }
+
+/* ---- layout ---- */
+.content {
+  padding: 10px;
+}
+table.layout { width: 100%; border-collapse: collapse; }
+table.layout > tbody > tr > td { vertical-align: top; }
+td.sidebar { width: 210px; padding-right: 10px; }
+td.main { padding-left: 4px; }
+
+table.subrow { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+table.subrow > tbody > tr > td { vertical-align: top; }
+td.subcol { width: 50%; }
+td.subcol:first-child { padding-right: 6px; }
+td.subcol:last-child { padding-left: 6px; }
+
+/* ---- boxes ---- */
+.box {
+  border: 2px outset #4a4a55;
+  background-color: #181820;
+  margin-bottom: 10px;
+}
+.box .boxhead {
+  background-color: #2b2b3a;
+  border-bottom: 1px solid #444;
+  color: #f0c34b;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.box .boxhead:hover { background-color: #34344450; }
+.box .boxhead::after {
+  content: "[-]";
+  float: right;
+  color: #7a8091;
+  font-weight: normal;
+}
+.box.collapsed .boxhead::after { content: "[+]"; }
+.box.collapsed .boxhead { border-bottom: none; }
+.box .boxbody { padding: 8px; }
+.box.collapsed .boxbody { display: none; }
+
+/* ---- form controls ---- */
+input[type=text], input[type=number], select {
+  background-color: #0e0e12;
+  color: #d7d7d7;
+  border: 1px inset #555;
+  font-family: Verdana, Geneva, Arial, sans-serif;
+  font-size: 12px;
+  padding: 2px 3px;
+}
+input#champSearch { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+
+label { color: #9aa0ad; }
+
+button {
+  background-color: #2b2b3a;
+  color: #d7d7d7;
+  border: 2px outset #555;
+  font-family: Verdana, Geneva, Arial, sans-serif;
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+button:active { border-style: inset; }
+button:hover { color: #f0c34b; }
+
+/* ---- champion header ---- */
+.champHeader {
+  border-bottom: 1px dashed #444;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.champHeader .cname {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f0c34b;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+.champHeader .ctitle {
+  color: #8a93a6;
+  font-style: italic;
+}
+
+/* ---- ability table ---- */
+table.abilities {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #3a3a46;
+}
+table.abilities th {
+  background-color: #2b2b3a;
+  color: #f0c34b;
+  border: 1px solid #3a3a46;
+  padding: 5px 6px;
+  font-size: 11px;
+  text-align: left;
+}
+table.abilities td {
+  border: 1px solid #2c2c36;
+  padding: 5px 6px;
+  vertical-align: middle;
+}
+table.abilities tr.rowA { background-color: #171720; }
+table.abilities tr.rowB { background-color: #1c1c26; }
+table.abilities td.abilKey {
+  font-weight: bold;
+  color: #f0c34b;
+  width: 28px;
+  text-align: center;
+  font-size: 14px;
+}
+table.abilities td.abilName { min-width: 140px; }
+table.abilities .rankSelect { width: 100%; }
+table.abilities td.cdCell { white-space: nowrap; }
+table.abilities .cdBase { color: #8a93a6; font-size: 11px; }
+table.abilities .cdFinal { color: #7fe07f; font-weight: bold; font-size: 13px; }
+table.abilities .notLearned { color: #888; font-style: italic; }
+
+.autoTag {
+  font-size: 9px;
+  color: #6a6a76;
+}
+.overrideTag {
+  font-size: 9px;
+  color: #f0c34b;
+}
+
+hr.old { border: none; border-top: 1px dashed #444; margin: 10px 0; }
+
+.footer {
+  text-align: center;
+  color: #666;
+  font-size: 10px;
+  padding: 10px;
+  border-top: 2px inset #333;
+}
+.footer a { color: #6ea8ff; }
+
+.sourceNote {
+  font-size: 10px;
+  color: #7a8091;
+}
+.sourceNote a { color: #6ea8ff; }
+
+.champListBox {
+  max-height: 520px;
+  overflow-y: auto;
+  border: 1px inset #444;
+  background-color: #0e0e12;
+}
+.champListBox a {
+  display: block;
+  padding: 2px 6px;
+  text-decoration: none;
+  color: #b7bcc7;
+  font-size: 11px;
+  border-bottom: 1px solid #1c1c24;
+}
+.champListBox a:hover { background-color: #2b2b3a; color: #f0c34b; }
+.champListBox a.selected { background-color: #3a3a1a; color: #f0c34b; }
+
+table.formula {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+table.formula td { padding: 2px 6px; border-bottom: 1px dotted #333; }
+
+.blink { animation: blinker 1.4s step-start infinite; color: #f0c34b; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+.badge {
+  display: inline-block;
+  background: #2b2b3a;
+  border: 1px solid #4a4a55;
+  color: #9aa0ad;
+  font-size: 9px;
+  padding: 1px 4px;
+  margin-left: 4px;
+}
+
+/* ---- cooldown tracker icons (mid-game overlay replacement) ---- */
+table.abilities td.trackCell { text-align: center; width: 44px; }
+.trackIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 34px;
+  height: 34px;
+  background-color: #2b2b3a;
+  border: 2px outset #565668;
+  color: #f0c34b;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.trackIcon:hover { background-color: #383850; }
+.trackIcon:active { border-style: inset; }
+.trackIcon.trackDisabled {
+  cursor: default;
+  opacity: 0.3;
+  border-style: inset;
+}
+.trackIcon.trackDisabled:hover { background-color: #2b2b3a; }
+.trackIcon .trackLabel { line-height: 1; }
+.trackIcon.onCooldown .trackLabel { opacity: 0.25; }
+.trackIcon .trackTime {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,0.72);
+  color: #ff6a6a;
+  font-weight: bold;
+  font-size: 13px;
+}
+.trackIcon.onCooldown { background-color: #0a0a0d; border-color: #333; }
+.trackIcon.onCooldown .trackTime { display: flex; }
+.trackHint {
+  font-size: 10px;
+  color: #7a8091;
+  margin-top: 6px;
+}
