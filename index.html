@@ -34,32 +34,39 @@
 
         </td>
         <td class="main">
-          <div class="box">
-            <div class="boxhead">&gt;&gt; Cooldowns</div>
-            <div class="boxbody" id="mainPanel"></div>
-          </div>
-
-          <div class="box" id="summonerBox">
-            <div class="boxhead">&gt;&gt; Summoner Spells</div>
-            <div class="boxbody">
-              <table class="formula" style="margin-bottom:8px;">
-                <tr>
-                  <td style="width:50%;">
-                    <label for="spell1Select">Summoner Spell 1:</label><br>
-                    <select id="spell1Select" style="width:100%;"></select>
-                  </td>
-                  <td style="width:50%;">
-                    <label for="spell2Select">Summoner Spell 2:</label><br>
-                    <select id="spell2Select" style="width:100%;"></select>
-                  </td>
-                </tr>
-              </table>
-              <label><input type="checkbox" id="lucidBootsCheck"> Lucid Boots (Ionian Boots of Lucidity) &mdash; +10 summoner spell haste</label><br>
-              <label><input type="checkbox" id="cosmicInsightCheck"> Cosmic Insight (rune) &mdash; +18 summoner spell haste</label>
-              <div id="summonerResults"></div>
-              <div class="sourceNote">Base cooldowns per <a href="https://wiki.leagueoflegends.com/en-us/" target="_blank">wiki.leagueoflegends.com</a> spell pages. Lucid Boots and Cosmic Insight values per their current wiki pages &mdash; both affect summoner spell haste, not ability haste, so they only change the numbers in this box.</div>
-            </div>
-          </div>
+          <table class="toprow" cellspacing="0" cellpadding="0">
+            <tr>
+              <td class="cooldownCol">
+                <div class="box">
+                  <div class="boxhead">&gt;&gt; Cooldowns</div>
+                  <div class="boxbody" id="mainPanel"></div>
+                </div>
+              </td>
+              <td class="summonerCol">
+                <div class="box" id="summonerBox">
+                  <div class="boxhead">&gt;&gt; Summoner Spells</div>
+                  <div class="boxbody">
+                    <table class="formula" style="margin-bottom:8px;">
+                      <tr>
+                        <td style="width:50%;">
+                          <label for="spell1Select">Summoner Spell 1:</label><br>
+                          <select id="spell1Select" style="width:100%;"></select>
+                        </td>
+                        <td style="width:50%;">
+                          <label for="spell2Select">Summoner Spell 2:</label><br>
+                          <select id="spell2Select" style="width:100%;"></select>
+                        </td>
+                      </tr>
+                    </table>
+                    <label><input type="checkbox" id="lucidBootsCheck"> Lucid Boots (Ionian Boots of Lucidity) &mdash; +10 summoner spell haste</label><br>
+                    <label><input type="checkbox" id="cosmicInsightCheck"> Cosmic Insight (rune) &mdash; +18 summoner spell haste</label>
+                    <div id="summonerResults"></div>
+                    <div class="sourceNote">Base cooldowns per <a href="https://wiki.leagueoflegends.com/en-us/" target="_blank">wiki.leagueoflegends.com</a> spell pages. Lucid Boots and Cosmic Insight values per their current wiki pages &mdash; both affect summoner spell haste, not ability haste, so they only change the numbers in this box.</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
 
           <table class="subrow" cellspacing="0" cellpadding="0">
             <tr>

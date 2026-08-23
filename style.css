@@ -18,7 +18,8 @@ a:visited { color: #b088e8; }
 a:hover { color: #ffcc33; }
 
 .pagewrap {
-  width: 950px;
+  width: 96%;
+  max-width: 1580px;
   margin: 12px auto;
   border: 2px outset #555;
   background-color: #14141a;
@@ -62,14 +63,25 @@ a:hover { color: #ffcc33; }
 }
 table.layout { width: 100%; border-collapse: collapse; }
 table.layout > tbody > tr > td { vertical-align: top; }
-td.sidebar { width: 210px; padding-right: 10px; }
+td.sidebar { width: 190px; padding-right: 10px; }
 td.main { padding-left: 4px; }
+
+table.toprow { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+table.toprow > tbody > tr > td { vertical-align: top; }
+td.cooldownCol { width: 58%; padding-right: 6px; }
+td.summonerCol { width: 42%; padding-left: 6px; }
 
 table.subrow { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
 table.subrow > tbody > tr > td { vertical-align: top; }
 td.subcol { width: 50%; }
 td.subcol:first-child { padding-right: 6px; }
 td.subcol:last-child { padding-left: 6px; }
+
+@media (max-width: 1100px) {
+  table.toprow, table.toprow > tbody, table.toprow > tbody > tr { display: block; }
+  table.toprow > tbody > tr > td.cooldownCol,
+  table.toprow > tbody > tr > td.summonerCol { display: block; width: 100%; padding: 0; }
+}
 
 /* ---- boxes ---- */
 .box {
