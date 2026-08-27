@@ -11,6 +11,9 @@ body {
   font-size: 12px;
   margin: 0;
   padding: 0;
+  /* stop iOS/Android from inflating text sizes on rotation */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 a { color: #6ea8ff; text-decoration: underline; }
@@ -99,7 +102,9 @@ td.subcol:last-child { padding-left: 6px; }
   cursor: pointer;
   user-select: none;
 }
-.box .boxhead:hover { background-color: #34344450; }
+@media (hover: hover) {
+  .box .boxhead:hover { background-color: #34344450; }
+}
 .box .boxhead::after {
   content: "[-]";
   float: right;
@@ -228,7 +233,9 @@ hr.old { border: none; border-top: 1px dashed #444; margin: 10px 0; }
   font-size: 11px;
   border-bottom: 1px solid #1c1c24;
 }
-.champListBox a:hover { background-color: #2b2b3a; color: #f0c34b; }
+@media (hover: hover) {
+  .champListBox a:hover { background-color: #2b2b3a; color: #f0c34b; }
+}
 .champListBox a.selected { background-color: #3a3a1a; color: #f0c34b; }
 
 table.formula {
@@ -283,14 +290,18 @@ table.abilities td.trackCell { text-align: center; width: 58px; }
   cursor: pointer;
   user-select: none;
 }
-.trackIcon:hover { background-color: #383850; }
+@media (hover: hover) {
+  .trackIcon:hover { background-color: #383850; }
+}
 .trackIcon:active { border-style: inset; }
 .trackIcon.trackDisabled {
   cursor: default;
   opacity: 0.3;
   border-style: inset;
 }
-.trackIcon.trackDisabled:hover { background-color: #2b2b3a; }
+@media (hover: hover) {
+  .trackIcon.trackDisabled:hover { background-color: #2b2b3a; }
+}
 .trackIcon .trackLabel { line-height: 1; }
 .trackIcon.onCooldown .trackLabel { opacity: 0.25; }
 .trackIcon .trackTime {
@@ -310,4 +321,113 @@ table.abilities td.trackCell { text-align: center; width: 58px; }
   font-size: 10px;
   color: #7a8091;
   margin-top: 6px;
+}
+
+/* ===================================================================
+   MOBILE / TOUCH  --  everything below only applies on small screens
+   or touch devices. Desktop layout above is untouched.
+   =================================================================== */
+
+/* kill the 300ms tap delay + double-tap-zoom on interactive controls, and
+   the blue tap flash, so taps register instantly like a native app */
+.trackIcon, .alertToggle, .box .boxhead, .champListBox a, button, select,
+input[type=checkbox], input[type=range] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 820px) {
+  /* ---- full-bleed page, no wasted margin on a phone ---- */
+  .pagewrap {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: none;
+    border-bottom: 2px inset #333;
+    /* respect notches / rounded corners in standalone mode */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  body { overscroll-behavior-y: contain; }
+  .content { padding: 8px; }
+
+  /* ---- banner shrinks so it doesn't eat the screen ---- */
+  .banner { padding: 8px 10px; }
+  .banner h1 { font-size: 17px; letter-spacing: 0; line-height: 1.25; }
+  .banner .subtitle { font-size: 10px; }
+
+  /* ---- nav wraps instead of overflowing; hide the joke text ---- */
+  .navbar { font-size: 12px; line-height: 1.9; padding: 5px 8px; }
+  .navbar .navDesktopOnly { display: none; }
+  .navbar a { text-decoration: none; padding: 2px 0; }
+
+  /* ---- every multi-column table layout collapses to a single stack ---- */
+  table.layout, table.layout > tbody, table.layout > tbody > tr,
+  table.toprow, table.toprow > tbody, table.toprow > tbody > tr,
+  table.subrow, table.subrow > tbody, table.subrow > tbody > tr { display: block; }
+  table.layout > tbody > tr > td.sidebar,
+  table.layout > tbody > tr > td.main,
+  table.toprow > tbody > tr > td.cooldownCol,
+  table.toprow > tbody > tr > td.summonerCol,
+  table.subrow > tbody > tr > td.subcol {
+    display: block;
+    width: auto;
+    padding: 0;
+  }
+
+  /* ---- champion picker: short list so it doesn't push content off-screen,
+         with finger-sized rows ---- */
+  .champListBox { max-height: 168px; -webkit-overflow-scrolling: touch; }
+  .champListBox a { padding: 9px 10px; font-size: 13px; }
+
+  /* ---- 16px inputs: below this iOS Safari force-zooms the page on focus ---- */
+  input[type=text], input[type=number], select {
+    font-size: 16px;
+    padding: 7px 6px;
+  }
+  input#champSearch { margin-bottom: 8px; }
+  input[type=range] { height: 30px; }
+
+  /* ---- section headers as big tap targets ---- */
+  .box .boxhead { padding: 10px 10px; font-size: 13px; }
+  .box .boxbody { padding: 8px; }
+
+  /* ---- ability/spell tables: drop the redundant Key column (the Track
+         icon is already labelled Q/W/E/R), tighten padding, keep all
+         numbers on screen without a horizontal scroll ---- */
+  table.abilities td.abilKey, table.abilities th.thKey { display: none; }
+  table.abilities th, table.abilities td { padding: 6px 4px; font-size: 12px; }
+  table.abilities td.abilName { min-width: 0; font-size: 12px; }
+  table.abilities .cdBase { display: block; font-size: 10px; }
+  table.abilities .cdFinal { font-size: 14px; }
+  table.abilities td.cdCell { white-space: normal; }
+  table.abilities .rankSelect { min-width: 74px; }
+
+  /* ---- bigger tracker icons + checkboxes for thumbs ---- */
+  table.abilities td.trackCell { width: 64px; padding: 6px 3px; }
+  .trackIcon { width: 46px; height: 46px; font-size: 15px; }
+  .trackIcon .trackTime { font-size: 16px; }
+  .alertToggle { font-size: 11px; margin-top: 6px; }
+  .alertToggle input { width: 20px; height: 20px; }
+  label > input[type=checkbox] { width: 20px; height: 20px; vertical-align: -4px; }
+  #summonerBox label { display: inline-block; line-height: 2.1; }
+
+  .trackHint, .sourceNote { font-size: 11px; line-height: 1.5; }
+  .footer { font-size: 10px; line-height: 1.6; padding: 10px 8px; }
+}
+
+/* ---- very narrow phones (<=380px): squeeze a little further ---- */
+@media (max-width: 380px) {
+  .banner h1 { font-size: 15px; }
+  table.abilities th, table.abilities td { padding: 5px 3px; }
+  table.abilities td.trackCell { width: 56px; }
+  .trackIcon { width: 42px; height: 42px; }
+}
+
+/* ---- landscape phone: banner would waste most of the height ---- */
+@media (max-width: 950px) and (max-height: 480px) and (orientation: landscape) {
+  .banner { padding: 4px 8px; }
+  .banner h1 { font-size: 14px; }
+  .banner .subtitle { display: none; }
+  .champListBox { max-height: 120px; }
 }

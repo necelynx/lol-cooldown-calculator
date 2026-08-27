@@ -105,6 +105,35 @@ This isn't in Data Dragon — it's playstyle convention, not a game rule — so 
 - Alert checkboxes are independent of the tracker itself — checking "Alert" doesn't start a timer, it just decides whether a *future* timer for that slot announces itself when it finishes. Your checked/unchecked choices persist across champion switches and re-renders (level/haste changes), so you can, e.g., always leave "R" and "Flash" checked and forget about it.
 - Why not different distinct chime sounds instead of speech? A single set of ability-specific spoken names scales to all 173 champions x 4 abilities without needing 692 unique sound files, and it's the same self-describing approach real casters/coaches use ("his flash is up") rather than needing to memorize which beep pitch means which ability.
 
+## Phone / mobile use
+
+The desktop layout is unchanged. Everything below only activates on small screens (under 820px wide) or touch devices, so nothing about the PC experience is affected.
+
+**Layout**
+- All multi-column layouts collapse into a single full-width stack: Select Champion, then Cooldowns, then Summoner Spells, then Champion Stats, then the reference sections.
+- The page goes edge-to-edge (no wasted outer border/margin) and respects notches and rounded corners via `env(safe-area-inset-*)`.
+- The champion list shrinks to a short scroll box (~168px) with finger-sized rows, so it doesn't push the actual numbers off-screen.
+- The redundant "Key"/"Slot" first column is hidden — the Track icon is already labelled Q/W/E/R and FL/TP/etc — which frees the width needed to fit the remaining columns without horizontal scrolling.
+- "Ability Haste Formula" and "Notes on Rank Estimation" start collapsed on phones (they're static reference text), so the live parts of the tool are all reachable without a long scroll. Tap either title bar to expand. Desktop still opens with everything expanded.
+- A separate landscape-phone breakpoint shrinks the banner, which would otherwise eat most of a short screen.
+- A narrow-phone breakpoint (≤380px) tightens padding further.
+
+**Touch handling**
+- Track icons grow from 34px to 46px, and Alert checkboxes to 20px, for reliable thumb taps.
+- `touch-action: manipulation` removes the ~300ms tap delay and double-tap-to-zoom on all interactive controls, so taps register instantly.
+- The blue tap-highlight flash is removed via `-webkit-tap-highlight-color: transparent`.
+- All `:hover` styling is wrapped in `@media (hover: hover)` so hover states don't get "stuck" on after a tap, which is the usual giveaway that a site was built desktop-only.
+- Text inputs and selects are set to 16px on mobile, which is the threshold below which iOS Safari force-zooms the whole page when you focus a field.
+- Tapping a champion blurs the search field (dismissing the on-screen keyboard) and smooth-scrolls to the cooldown table.
+- Short haptic vibration on tracker tap, and a distinct triple-buzz pattern when a cooldown finishes (Android; iOS Safari doesn't expose the Vibration API).
+- `overscroll-behavior-y: contain` prevents pull-to-refresh from firing while you're tapping near the top of the page.
+
+**Installable / offline (PWA)**
+- `manifest.json` plus a `<meta name="viewport">` tag and app icons make it installable to the home screen ("Add to Home Screen" on iOS, "Install app" on Android). Once installed it launches in standalone mode with no browser address bar, which is what makes it feel like a real app rather than a web page.
+- `sw.js` is a service worker that caches the page so it keeps working with no connection. It's deliberately **network-first**: a live copy is always preferred and the cache is only a fallback, so pushing an update never leaves you stuck on a stale version.
+- Screen wake lock: while any cooldown timer is actively running, the page asks the OS to keep the screen awake (`navigator.wakeLock`), so your phone doesn't sleep mid-game while you're using it as a tracker. The lock is released as soon as no timers are running, and re-acquired when you switch back to the tab.
+- Voice alerts are "primed" on your first tap. Mobile browsers refuse to play speech that wasn't started by a user gesture, so without this the automatic off-cooldown announcements would be silently swallowed on a phone.
+
 ## Explicit exclusions (per your instructions)
 
 - Passive abilities are not included, even for champions whose passive cooldown is affected by ability haste (e.g. Kled, Rakan, Vi). Only the 4 main abilities (Q/W/E/R) are calculated.

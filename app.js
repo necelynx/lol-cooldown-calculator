@@ -61,6 +61,51 @@ function beep() {
   } catch (e) { /* audio unavailable, ignore */ }
 }
 
+/* ---- mobile / touch helpers ---- */
+function isTouch() {
+  return ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+}
+function isNarrow() {
+  return window.matchMedia && window.matchMedia("(max-width: 820px)").matches;
+}
+
+/* short haptic tap when a tracker is toggled, so it feels physical on a phone.
+   Silently unsupported on desktop and on iOS Safari. */
+function haptic(ms) {
+  if (navigator.vibrate) { try { navigator.vibrate(ms || 15); } catch (e) {} }
+}
+
+/* iOS/Android require speech synthesis to be kicked off by a real user gesture
+   before it will play at all. Prime it silently on the first interaction so
+   later automatic off-cooldown alerts aren't swallowed. */
+var speechPrimed = false;
+function primeSpeech() {
+  if (speechPrimed || !window.speechSynthesis) return;
+  speechPrimed = true;
+  try {
+    var u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0;
+    window.speechSynthesis.speak(u);
+  } catch (e) { /* ignore */ }
+}
+
+/* keep the phone screen awake while any cooldown is actively running, so it
+   doesn't sleep mid-game while being used as a tracker on a second screen. */
+var wakeLock = null;
+function refreshWakeLock() {
+  if (!("wakeLock" in navigator)) return;
+  var anyRunning = Object.keys(trackers).some(function (k) { return !!trackers[k]; });
+  if (anyRunning && !wakeLock) {
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeLock = lock;
+      lock.addEventListener("release", function () { wakeLock = null; });
+    }).catch(function () { /* denied or unsupported, ignore */ });
+  } else if (!anyRunning && wakeLock) {
+    try { wakeLock.release(); } catch (e) {}
+    wakeLock = null;
+  }
+}
+
 function speak(text) {
   if (window.speechSynthesis && typeof SpeechSynthesisUtterance !== "undefined") {
     try {
@@ -75,6 +120,8 @@ function speak(text) {
 }
 
 function toggleTracker(key, cd) {
+  primeSpeech();
+  haptic(trackers[key] ? 10 : 20);
   if (trackers[key]) {
     trackers[key] = null;
   } else {
@@ -83,6 +130,7 @@ function toggleTracker(key, cd) {
     trackers[key] = { endTime: Date.now() + cd * 1000 };
   }
   updateTrackIcon(key);
+  refreshWakeLock();
 }
 
 function updateTrackIcon(key) {
@@ -106,6 +154,8 @@ function tickTrackers() {
       if (trackers[key].endTime - Date.now() <= 0) {
         trackers[key] = null;
         if (alerts[key]) speak(getAlertPhrase(key));
+        haptic([25, 60, 25]);
+        refreshWakeLock();
       }
       updateTrackIcon(key);
     }
@@ -246,6 +296,20 @@ function selectChampion(id) {
   ABIL_KEYS.forEach(function (k) { trackers[k] = null; });
   renderChampList(document.getElementById("champSearch").value);
   render();
+  refreshWakeLock();
+  primeSpeech();
+  haptic(12);
+  /* on a phone the champion list sits above the cooldowns, so jump straight
+     to the numbers instead of leaving the user to scroll for them. Also drop
+     the on-screen keyboard if the search field still has focus. */
+  if (isNarrow()) {
+    var search = document.getElementById("champSearch");
+    if (search) search.blur();
+    var panel = document.getElementById("mainPanel");
+    if (panel && panel.scrollIntoView) {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 }
 
 function getRanks() {
@@ -276,7 +340,7 @@ function render() {
   html += '</div>';
 
   html += '<table class="abilities" cellspacing="0" cellpadding="0">';
-  html += "<tr><th>Key</th><th>Ability</th><th>Rank</th><th>Base CD</th><th>Effective CD</th><th>Track</th></tr>";
+  html += '<tr><th class="thKey">Key</th><th>Ability</th><th>Rank</th><th>Base CD</th><th>Effective CD</th><th>Track</th></tr>';
 
   ABIL_KEYS.forEach(function (k, idx) {
     var a = champ.abilities[k];
@@ -326,7 +390,7 @@ function render() {
     'Skill order (which ability is maxed first) is an estimate from current aggregate play data on ' +
     '<a href="https://u.gg/" target="_blank">u.gg</a>, <a href="https://mobalytics.gg/" target="_blank">Mobalytics</a> and ' +
     '<a href="https://op.gg/" target="_blank">op.gg</a> &mdash; override any ability\'s rank above if your build differs.</div>';
-  html += '<div class="trackHint">Click an ability\'s Track icon when you see the enemy use it, to start counting down its cooldown. Click it again to reset if you misclicked. Check \'Alert\' on any ability to hear it announced by voice the moment its cooldown ends.</div>';
+  html += '<div class="trackHint">' + (isTouch() ? "Tap" : "Click") + ' an ability\'s Track icon when you see the enemy use it, to start counting down its cooldown. ' + (isTouch() ? "Tap" : "Click") + ' it again to reset if you mis-tapped. Check \'Alert\' on any ability to hear it announced by voice the moment its cooldown ends.</div>';
 
   main.innerHTML = html;
   ABIL_KEYS.forEach(updateTrackIcon);
@@ -349,7 +413,7 @@ function renderSummonerSpells() {
   var spellHaste = (state.lucidBoots ? 10 : 0) + (state.cosmicInsight ? 18 : 0);
 
   var html = '<table class="abilities" cellspacing="0" cellpadding="0" style="margin-top:8px;">';
-  html += "<tr><th>Slot</th><th>Spell</th><th>Base CD</th><th>Effective CD</th><th>Track</th></tr>";
+  html += '<tr><th class="thKey">Slot</th><th>Spell</th><th>Base CD</th><th>Effective CD</th><th>Track</th></tr>';
 
   var slotKeys = ["spell1", "spell2"];
   [state.spell1, state.spell2].forEach(function (spellId, idx) {
@@ -368,7 +432,7 @@ function renderSummonerSpells() {
 
   html += '</table>';
   html += '<div class="sourceNote" style="margin-top:4px;">Total summoner spell haste applied: ' + spellHaste + '</div>';
-  html += '<div class="trackHint">Click a spell\'s Track icon when the enemy uses it, to start counting down its cooldown. Click it again to reset if you misclicked.</div>';
+  html += '<div class="trackHint">' + (isTouch() ? "Tap" : "Click") + ' a spell\'s Track icon when the enemy uses it, to start counting down its cooldown. ' + (isTouch() ? "Tap" : "Click") + ' it again to reset if you mis-tapped.</div>';
 
   container.innerHTML = html;
   updateTrackIcon("spell1");
@@ -446,6 +510,28 @@ window.onload = function () {
 
   render();
   renderSummonerSpells();
+
+  /* prime TTS on the very first user gesture of any kind (mobile browsers
+     block speech that isn't gesture-initiated) */
+  ["pointerdown", "keydown"].forEach(function (evt) {
+    document.addEventListener(evt, primeSpeech, { once: true });
+  });
+
+  /* re-acquire the screen wake lock when returning to the tab, since mobile
+     browsers drop it whenever the page is backgrounded */
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) refreshWakeLock();
+  });
+
+  /* on phones, start with the two reference-only sections folded away so the
+     cooldowns, summoner spells and level/haste inputs are all reachable
+     without a long scroll. Desktop keeps everything expanded as before. */
+  if (isNarrow()) {
+    ["formulabox", "notesbox"].forEach(function (id) {
+      var box = document.getElementById(id);
+      if (box) box.classList.add("collapsed");
+    });
+  }
 };
 
 function bindCollapseToggles() {
